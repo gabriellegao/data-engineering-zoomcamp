@@ -17,14 +17,20 @@ Setting -> Resources -> Advanced -> Memory Limit
 ```bash mkdir ~/<path_to_your_project_directory>/airflow```
 
 ### Import official `docker-compose.yaml` file
-```bash curl -LfO 'https://airflow.apache.org/docs/apache-airflow/stable/docker-compose.yaml'```
+```bash 
+curl -LfO 'https://airflow.apache.org/docs/apache-airflow/stable/docker-compose.yaml'
+```
 
 ### Create three new folders
-```bash mkdir -p ./dags ./logs ./plugins```
+```bash 
+mkdir -p ./dags ./logs ./plugins
+```
 --> 在airflow文件下，创建`dags`,`logs`,`plugs`
 
 ### Setup `AIRFLOW_UID`
-```bash echo -e "AIRFLOW_UID=$(id -u)" > .env```
+```bash 
+echo -e "AIRFLOW_UID=$(id -u)" > .env
+```
 
 ### Docker Build
 1. 首先在airflow文档下面，创建`Dockerfile`
@@ -43,18 +49,58 @@ Setting -> Resources -> Advanced -> Memory Limit
 
 ## Execution
 ### Build Docker Image
-```bash docker-compose build```
+```bash 
+docker-compose build
+```
 --> 读取`docker-compose.yaml`中指定的`Dockerfile`, 并创建镜像
 
 ### Initialize Airflow Settings
-```bash docker-compose up airflow-init```
+```bash 
+docker-compose up airflow-init
+```
 --> 初始化 Airflow 数据库和必要的配置
 --> 启动docker-compose.yaml 中定义的 airflow-init 服务
 
 ### Kick Off All Services
-```bash docker-compose up```
+```bash 
+docker-compose up
+```
 1. `airflow-webserver`: 提供 Web 界面，供用户访问和操作任务
 1. `airflow-scheduler`: 调度任务，确保 DAG 按计划执行
 1. `airflow-worker`: 执行任务（当使用 CeleryExecutor 时）
 1. `redis`: 用作任务队列的消息代理
 1. `postgres`: 用作 Airflow 的元数据库
+
+***如果环境变量发生改变，需按照以上三步重新启动docker***
+
+## DGAs
+### Definition
+在 Apache Airflow 中，DAGs 是 Directed Acyclic Graphs（有向无环图） 的简称。它是 Airflow 的核心概念，用于定义任务的执行顺序和依赖关系。简单来说，DAG 是 Airflow 的工作流框架，用于组织和调度一组任务。
+
+### Architecture
+1. DAGs定义：用于设置工作流的调度属性，比如名字、开始时间、运行间隔等。
+1. Tasks: 实际的操作，比如运行脚本、移动文件、调用 API 等。
+1. 任务执行顺序：任务之间通过依赖关系连接，定义了执行顺序。
+
+## Additional Notes
+### Download data from url
+```bash
+curl -sSL <url> > <path_to_the_file>
+```
+从网页上下载文件，`L`意思是，如果link跳转到其他页面，会自动跟随
+
+### Setup environment variable
+1. Terminal
+```bash
+export variable_name = variable_value
+```
+1. .env
+```python
+variable_name = variable_value
+```
+
+1. docker-compose.yaml
+```bash
+environment:
+    varibale_name = variable_value
+```
