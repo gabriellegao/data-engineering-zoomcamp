@@ -27,3 +27,6 @@ Data is split into multiple realted tables. Each table focuses on a single subje
 Data from multiple tables is consolidated into fewer tables or a single table, often including duplicated data to reduce the need for complex joins and improve query performance.
 1. Faster Reads
 2. Simpler Queries: data is stored in a flat structure, making it easier to query.
+
+## ML Algorithm Diagram
+![ML Algorithm Diagram](ml-alg-dgm.png)
