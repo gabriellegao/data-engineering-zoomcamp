@@ -1,5 +1,5 @@
 # 忽略 CSV 文件
-*.csv
+# *.csv
 
 # 忽略特定目录
 ny_taxi_postgres_data/
