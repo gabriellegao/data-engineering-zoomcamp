@@ -50,6 +50,42 @@ Variable defines value used across the project. It can be defined in two ways:
 {{ var('variable_value') }}
 ```
 
+### Test
+Test is defined in `yaml` file for columns including:
+1. Unique
+   ```dbt
+   tests:
+     - unique:
+        severity: warn
+   ```
+2. Not Null
+   ```dbt
+   test:
+     - not_null:
+        severity: warn
+   ```
+3. Accepted Value
+   ```dbt
+   tests:
+    - accepted_values:
+        values: "{{ var('payment_type_values') }}"
+        severity: warn
+        quote: false
+   ```
+4. Relationships to other materializations
+   ```dbt
+   tests:
+     - relationships:
+       to: ref('taxi_zone_lookup')
+       field: locationid
+       severity: warn
+   ```
+
+### Documentation
+```dbt
+dbt docs generate
+```
+
 ### Build Table
 ```dbt
 dbt build
@@ -59,3 +95,42 @@ dbt build
 ```dbt
 dbt deps
 ```
+
+### Create Dataset for dbt
+Setting --> Credentials --> Development Credentials --> Type your new dataset name in dataset box  
+The dbt will generate a new dataset in your GCP.
+
+### Create `schema.yaml` in Staging Folder
+```dbt
+version: 2
+
+sources:
+  - name: staging
+    database: <your_database_name>
+    schema: <your_dataset_name>
+
+    tables:
+      - name: <table_name_1>
+      - name: <table_name_2>
+```
+
+### Generate Schema
+After installing `dbt-labs/codegen` in the `packages.yaml`, you can use the following command to generate the schema for you moedels. 
+```dbt
+{% set models_to_generate = codegen.get_models(directory='staging', prefix='stg') %}
+{{ codegen.generate_model_yaml(
+    model_names = models_to_generate
+) }}
+```
+1. Click `Compile` button, the dbt will generate the schema for your models   
+1. Copy the schema and paste to your `schema.yaml`
+
+### Jobs
+There two job types: normal job and CI job.  
+*Jobs run on the top of main branch in repo. Don't forget to push the changes to main branch.*
+
+Normal Job  
+It can be manually triggered or be triggered by schedules. 
+
+CI Job  
+It's triggered by pull request in git repo
