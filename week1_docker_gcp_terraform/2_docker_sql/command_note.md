@@ -5,11 +5,15 @@ docker build -t <image_name> .
 --> In default, Docker only looks for the file named Dockerfile
 
 ## Create Container
-docker run -it <optional:container_name> <image>
+```bash
+docker run -it <optional:container_name><image_name><karg>
+```
 --> Create a new container based on the image
 
 ## Execute Container
+```bash
 docker exec -it <container_id> bash
+```
 --> Open and enter the bash shell in existing container
 
 ## List the running containers
@@ -55,7 +59,7 @@ docker run -it \
   postgres:13
 --> Create a container upon the image postgres:13, and set the user name and password for identity verification. pg-database看守着5432这个门，任何想要进入5432的行为，都需要先通过身份验证
 
-## Run PgAdmin in network
+## Run PgAdmin in Network
 docker run -it \
   -e PGADMIN_DEFAULT_EMAIL="admin@admin.com" \
   -e PGADMIN_DEFAULT_PASSWORD="root" \
