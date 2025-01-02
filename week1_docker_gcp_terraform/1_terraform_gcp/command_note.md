@@ -109,11 +109,19 @@ pip install pgcli
 ```
 
 ### Google Cloud CLI
-Assign the service account private key to `GOOGLE_APPLICATION_CREDENTIALS`
+- Move credential json file from local machine to google cloud
 ```bash
-export GOOGLE_APPLICATION_CREDENTIALS=~/.gc/my-creds.json
+cd ~/.google/credentials/ # Locate the json file
+sftp de-zoomcamp # Connect to Google VM
+mkdir ~/.google/credentials/
+put google_credentials.json # Upload json file to cloud
 ```
-Authenticate to service account with credential
+- Assign the service account private key (`.json`) to `GOOGLE_APPLICATION_CREDENTIALS`
+- Add command to `.bashrc`
+```bash
+export GOOGLE_APPLICATION_CREDENTIALS=~/.google/credentials/google_credentials.json
+```
+- Authenticate and connect to service account with credential
 ```bash
 gcloud auth activate-service-account --key-file $GOOGLE_APPLICATION_CREDENTIALS
 ```

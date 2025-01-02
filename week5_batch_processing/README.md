@@ -153,6 +153,209 @@ Partition table into multi files. The number of output files are the same as the
 df.repartition(num_layers).write
 ```
 
+## Spark Internal
+### Spark Cluster
+We need to split the data file to multiple partition.  
+The Driver Node assigns each partition to each Worker Node, and Worker Node process the job.  
+After completing the job, the Worker Node will be assigned next job and process it again until all the jobs are finished.
+
+### Spark GroupBy
+Stage 1
+   - Process data in each partition with filter and groupby. 
+   - Output the result for each partition
+
+Intermediate Stage
+   - Reshuffling, moving outputs from each partition to next new partition.
+   - In each new partition, the records are sorted and have the same groupby
+   - The algorithm of Reshuffling is called External Merge Sort
+  
+Stage 2 
+   - Place the same groupby into one block (partition).
+   - Complete the rest of jobs (e.g. aggregation) 
+### Spark Join
+Stage 1
+    - Process data and generate keys (join keys) for each record
+
+Intermediate Stage
+    - Reshuffling, place the same keys into new partitions
+  
+Stage 2
+    - Combine record with the same key into one row
+
+### Spark Broadcast
+- Broadcast happens when joining a small dataframe.  
+- Each Worker Nodes copy the entire small dataframe and the join happens in memory.
+
+## Resilient Distributed Datasets (RDD): Map and Reduce
+### Definition of RDD
+- Resilient: Fault-tolerant and capable of recomputing lost data from the lineage (a history of transformations used to build the dataset).
+- Distributed: The data is divided across multiple nodes in a cluster, enabling parallel processing.
+- Dataset: A collection of records, where each record can be an object, such as a row in a dataset.
+### Where in DataFrame vs. Filter in RDD
+
+- Define a filter function `filter_func`
+```python
+def filter_func(row):
+    return row.column >= benchmark
+```
+- Call `filter_func` in RDD filter  
+- `filter_func` read each row in `rdd` and return results  
+```python
+rdd.filter(filter_func)
+```
+***Attention***
+```python
+# Wrong format 
+rdd.filter(filter_func(row))
+```
+This expression process values representing by `row` using `filter_func` instead of each row in `rdd`  
+```python
+# Output for `rdd.filter(filter_func(row))`
+rdd.filter(True)
+```
+
+### GroupBy in DataFrame vs. Map and ReduceByKey in RDD
+- Prepare keys and values
+- Composite key = (`hour`, `zone`)
+- Composite value = (`amount`, `count`)
+```python
+def key_value_func(row):
+    hour = row.lpep_pickup_datetime\
+                .replace(minute=0, second=0, microsecond=0)
+    zone = row.PULocationID
+    key = (hour, zone)
+    
+    amount = row.total_amount
+    count = 1
+    value = (amount, count)
+    
+    return (key,value)
+```
+- Calculate Sum
+- Sum up values (composite value) with the same key (composite key)
+```python
+def calculate_sum(left_value, right_value):
+    left_amount, left_count = left_value
+    right_amount, right_count = right_value
+    
+    output_amount = left_amount + right_amount
+    output_count = left_count + right_count
+    
+    return (output_amount, output_count)
+```
+- Call functions: `key_value_func` and `calculate_sum`
+```python
+rdd\
+    .map(key_value_func)\
+    .reduceByKey(calculate_sum)
+# Output:[((key1,key2), (value1, value2))((...),(...))]
+```
+### RDD to DataFrame: Map and ToDF
+- Define a `unwrap` function to format each row 
+```python
+def unwrap(row):
+    return (row[0][0], row[0][1], row[1][0], row[1][1])
+```
+- Call `unwrap` function
+```python
+rdd.map(unwrap)\
+    .toDF()
+# Output : [(key1, key2, value1, value2),(...)]
+```
+
+### Naming Columns
+- Define a namedtuple function `revenuerow` and assign column names
+```python
+from collections import namedtuple
+revenuerow = namedtuple('revenuerow', ['hour','zone','revenue','count'])
+```
+- Call `revenuerow` functions and assign value to each column
+```python
+def unwrap(row):
+    return revenuerow(
+        hour = row[0][0], 
+        zone = row[0][1], 
+        revenue = row[1][0], 
+        count = row[1][1])
+```
+- Return a dataframe with column names
+```python        
+rdd.map(unwrap)\
+    .toDF()\
+    .show()
+```
+## RDD: MapPartition
+### Definition of MapPartition
+MapPartition process RDD by partition. Each partition is a iterator
+```python
+rdd.mapPartition(func)
+```
+### Map vs. MapPartition
+- Map process RDD by row
+- MapPartition process RDD by partition
+
+### RDD to Pandas DataFrame
+```python
+import pandas as pd
+columns = [....]
+rows = rdd.take(5)
+df = pd.DataFrame(rows, columns = columns)
+```
+
+### Pandas DataFrame to RDD
+- Yield
+  - Generator function, similar as iterator
+  - Yield here add each row into a iterator  
+- Itertuples
+  - Used only for Panda DataFrame, iterating each row
+```python
+def func(df):
+    for row in df.itertuples():
+        yield row
+```
+```python
+# Example Code
+def yield_iter():
+    yield 1
+    yield 2
+    yield 3
+gen = yield_iter
+next(gen)
+list(gen)
+```
+
+### RDD to Spark DataFrame
+```python
+rdd.toDF(schema).show()
+```
+
+### Iterator
+```python
+list = [1,2,3]
+list_iter = iter(list)
+next(list_inter)
+# Output:
+# 1
+# 2
+# 3
+list(list_iter)
+# Output: [1,2,3]
+```
+## Connection to GCS
+### Upload Data to GCS
+```bash
+gsutil -m cp -r pq/ gs://nifty-structure-252803-terra-bucket/pq
+```
+- `cp`: cppy  
+- `-r`: recursive  
+- `-m`: use all cpus  
+
+### Download Google Cloud Storage Connector for Hadoop
+```bash
+mkdir lib/
+gsutil cp gs://hadoop-lib/gcs/gcs-connector-hadoop3-2.2.5.jar gcs-connector-hadoop3-2.2.5.jar
+```
+
 ## Additional Notes
 List all the file including hidden one
 ```bash
@@ -196,35 +399,15 @@ List folder files in a tree format
 tree <folder_name>
 ```
 
-## Spark Internal
-### Spark Cluster
-We need to split the data file to multiple partition.  
-The Driver Node assigns each partition to each Worker Node, and Worker Node process the job.  
-After completing the job, the Worker Node will be assigned next job and process it again until all the jobs are finished.
+Return the package path
+```bash
+which <package_name>
+```
 
-### Spark GroupBy
-Stage 1
-   - Process data in each partition with filter and groupby. 
-   - Output the result for each partition
+Lambda是一种内嵌函数，类似def function
+```python
+lambda arguments: expression
+squared = lambda x: x**2
+print(squared(5)) #output: 25
+```
 
-Intermediate Stage
-   - Reshuffling, moving outputs from each partition to next partition.
-   - In each new partition, the records are sorted and have the same groupby
-   - The algorithm of Reshuffling is called External Merge Sort
-  
-Stage 2 
-   - Place the same groupby into one block.
-  
-### Spark Join
-Stage 1
-    - Process data and generate keys (join keys) for each record
-
-Intermediate Stage
-    - Reshuffling, place the same keys into new partitions
-  
-Stage 2
-    - Combine record with the same key into one row
-
-### Spark Broadcast
-Broadcast happens when joining a small dataframe.  
-Each Worker Nodes copy the entire small dataframe and the join happens in memory.
