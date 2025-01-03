@@ -62,6 +62,13 @@ export PYTHONPATH="${SPARK_HOME}/python/lib/py4j-0.10.9.5-src.zip:$PYTHONPATH"
 ```
 *Run this two commands before start Jupyter Notebook*
 
+## Download Massive Data from URL
+- Use `.sh` file to download ny taxi data for yellow and green from 2020 to 2021
+- Link: [download_data.sh](download_data.sh)
+```bash
+./download_data.sh <param1> <param2>
+```
+
 ## PySpark Script
 ### Port
 Add port `8888` to port pannel in vscode. This port links to Jupyter Notebook
@@ -78,6 +85,7 @@ Download this file in Jupyter Notebook
 import pyspark
 from pyspark.sql import SparkSession
 
+# Build a Local Spark Cluster(inside notebook)
 spark = SparkSession.builder \
     .master("local[*]") \
     .appName('test') \
@@ -96,7 +104,7 @@ df.write.parquet('zones')
 ```
 
 ### Schema Commands
-1. Define Schema
+- Define Schema
 ```python
 # Import schema required packages
 from pyspark.sql.types import StructType, StructField, StringType, TimestampType, IntegerType
@@ -109,7 +117,7 @@ schema = StructType([
     StructField('PULocationID', IntegerType(), True), 
     StructField('DOLocationID', IntegerType(), True)])
 ```
-2. Print Schema
+- Print Schema
 ```python
 df.schema
 df.printSchema()
@@ -341,7 +349,7 @@ next(list_inter)
 list(list_iter)
 # Output: [1,2,3]
 ```
-## Connection to GCS
+## Connect Spark to GCS
 ### Upload Data to GCS
 ```bash
 gsutil -m cp -r pq/ gs://nifty-structure-252803-terra-bucket/pq
@@ -355,6 +363,114 @@ gsutil -m cp -r pq/ gs://nifty-structure-252803-terra-bucket/pq
 mkdir lib/
 gsutil cp gs://hadoop-lib/gcs/gcs-connector-hadoop3-2.2.5.jar gcs-connector-hadoop3-2.2.5.jar
 ```
+
+### Connect Spark to GCS
+```python
+# Import Packages
+import pyspark
+from pyspark.sql import SparkSession
+from datetime import datetime
+from pyspark.conf import SparkConf
+from pyspark.context import SparkContext
+
+# Credential location needs to be full path, "~" is not accepted
+credentials_location = '/home/gabrielle/.google/credentials/google_credentials.json'
+
+# Setup Spark Configuration and GSC Authentication
+conf = SparkConf() \
+    .setMaster('local[*]') \
+    .setAppName('test') \
+    .set("spark.jars", "./lib/gcs-connector-hadoop3-2.2.5.jar") \
+    .set("spark.hadoop.google.cloud.auth.service.account.enable", "true") \
+    .set("spark.hadoop.google.cloud.auth.service.account.json.keyfile", credentials_location)
+
+# Build Spark Context
+sc = SparkContext(conf=conf)
+
+hadoop_conf = sc._jsc.hadoopConfiguration()
+
+hadoop_conf.set("fs.AbstractFileSystem.gs.impl",  "com.google.cloud.hadoop.fs.gcs.GoogleHadoopFS")
+hadoop_conf.set("fs.gs.impl", "com.google.cloud.hadoop.fs.gcs.GoogleHadoopFileSystem")
+hadoop_conf.set("fs.gs.auth.service.account.json.keyfile", credentials_location)
+hadoop_conf.set("fs.gs.auth.service.account.enable", "true")
+
+# Build Spark Session
+spark = SparkSession.builder \
+    .config(conf=sc.getConf()) \
+    .getOrCreate()
+
+# Call Spark and Read Data from GCS
+df = spark.read.parquet()
+
+# Stop Spark Context
+SparkContext._active_spark_context.stop()
+```
+
+## Create a Local Spark Cluster
+### Install Spark Standalone
+- Location `sbin` folder in `~/home/gabrielle/spark/spark-3.3.2-bin-hadoop3`
+```bash
+./sbin/start-master.sh
+```
+
+### Ports
+- `8080`: Monitor Spark Jobs
+- `7077`: Master Port
+
+### Initialize Worker/Slave Shell
+```bash
+# Old version: start-slaves.sh, New version: start-worker.sh
+# Find URL in localhost:8080
+./sbin/start-worker.sh spark://de-zoomcamp.us-central1-c.c.nifty-structure-252803.internal:7077
+```
+### Convert Jupyter Notebook to Python Script
+```bash
+jupyter nbconvert --to=script <notebook_name>
+```
+
+### Run Python Script
+```bash
+export PYTHONPATH="${SPARK_HOME}/python/:$PYTHONPATH"
+export PYTHONPATH="${SPARK_HOME}/python/lib/py4j-0.10.9.5-src.zip:$PYTHONPATH"
+python <notebook_name>
+```
+
+### Run Python Script with Args
+- Master URL(Master Node and Master Port) was set inside of py script
+- Master URL: `.master("spark://de-zoomcamp.us-central1-c.c.nifty-structure-252803.internal:7077")`
+```bash
+python 08_local_spark_cluster.py \
+    --input_green=data/pq/green/2020/*/ \
+    --input_yellow=data/pq/yellow/2020/*/ \
+    --output=data/report/report-2020
+```
+
+### Run Python Script with Args and Master URL
+- Submit Spark Jobs to Spark Cluster
+- Link: [08_local_spark.py](08_local_spark.py)
+```bash
+URL="spark://de-zoomcamp.us-central1-c.c.nifty-structure-252803.internal:7077"
+spark-submit \
+    --master="${URL}" \
+    08_local_spark_cluster.py \
+      --input_green=data/pq/green/2021/*/ \
+      --input_yellow=data/pq/yellow/2021/*/ \
+      --output=data/report-2021
+```
+
+## Create a Dataproc Cluster
+### Upload Python Script to GSC Bucket
+```bash
+gsutil cp 08_local_spark_cluster.py gs://nifty-structure-252803-terra-bucket/code/08_local_spark_cluster.py
+```
+- Copy the file path into `Main Python File` box
+- Add arguments to `Arguments` box
+```bash
+--input_green=gs://nifty-structure-252803-terra-bucket/pq2/green/2021/*/ \
+--input_yellow=gs://nifty-structure-252803-terra-bucket/pq2/yellow/2021/*/ \
+--output=gs://nifty-structure-252803-terra-bucket/report-2021
+```
+
 
 ## Additional Notes
 List all the file including hidden one
@@ -381,9 +497,9 @@ Make the file executable
 chmod +x <file_name>
 ```
 
-3 means the length of number  
-0 means filling leading 0 when the length <3  
-x mean Hex 16, d means Digits 10.
+- 3 means the length of number  
+- 0 means filling leading 0 when the length <3  
+- x mean Hex 16, d means Digits 10.
 ```bash
 03x
 03d
@@ -409,5 +525,9 @@ Lambda是一种内嵌函数，类似def function
 lambda arguments: expression
 squared = lambda x: x**2
 print(squared(5)) #output: 25
+```
+- Convert Jupyter Notebook to Python Script
+```bash
+jupyter nbconvert --to=script <notebook_name>
 ```
 

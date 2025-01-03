@@ -1,8 +1,9 @@
-## Build image 
+## Build Image 
+In default, Docker only looks for the file named Dockerfile
 ```bash
 docker build -t <image_name> .
 ```
---> In default, Docker only looks for the file named Dockerfile
+
 
 ## Create Container
 ```bash
@@ -77,6 +78,7 @@ URL="https://github.com/DataTalksClub/nyc-tlc-data/releases/download/yellow/yell
 ```
 ```bash
 python ingest_data.py \
+# Read the args from below and put them into ingest_data.py
   --user=root \
   --password=root \
   --host=localhost \
@@ -86,12 +88,32 @@ python ingest_data.py \
   --url=${URL}
 ```
 ## Run docker
-```docker build -t taxi_ingest:v001 .```
---> 先创建好一个image连接着预设好的dockerfile, 包括环境以及script
---> In default, docker only look for the file named Dockerfile to build the image
+- 先创建好一个image连接着预设好的dockerfile, 包括环境以及script
+- In default, docker only looks for the file named Dockerfile to build the image
+```bash
+docker build -t taxi_ingest:v001 .
+```  
+- Download data from URL
+```bash
+URL="https://github.com/DataTalksClub/nyc-tlc-data/releases/download/yellow/yellow_tripdata_2021-01.csv.gz"
+```
+- Prepare Arguments in `ingest_data.py`
+```python
+import argparse
 
-```URL="https://github.com/DataTalksClub/nyc-tlc-data/releases/download/yellow/yellow_tripdata_2021-01.csv.gz"```
+parser = argparse.ArgumentParser(description='Ingest CSV data to Postgress')
 
+parser.add_argument('--user', help = 'user name')
+parser.add_argument('--password', help = 'password')
+parser.add_argument('--host', help = 'host')
+parser.add_argument('--port', help = 'port')
+parser.add_argument('--db', help = 'database name')
+parser.add_argument('--table_name', help ='table name')
+parser.add_argument('--url', help = 'csv url')
+
+args = parser.parse_args()
+```
+- `taxi_ingest:v001`是image, 这段代码的作用在于，借用image的设定创建一个container，并将这个container加入到pg-network网络里，在pg-database里已经设定好了user name and password. 当我们需要读取5432后面的数据时，需要找到其对应的host(看门人)以及port(门牌号)。再用user name and password解锁。
 ```bash
 docker run -it \
   --network=pg-network \
@@ -104,8 +126,6 @@ docker run -it \
     --table_name=yellow_taxi_trips \
     --url=${URL}
 ```
-
---> taxi_ingest:v001是image, 这段代码的作用在于，借用image的设定创建一个container，并将这个container加入到pg-network网络里，在pg-database里已经设定好了user name and password. 当我们需要读取5432后面的数据时，需要找到其对应的host（看门人）以及port（门牌号）。再用user name and password解锁。
 
 ## Run docker compose (Live, monitor logs)
 ```bash

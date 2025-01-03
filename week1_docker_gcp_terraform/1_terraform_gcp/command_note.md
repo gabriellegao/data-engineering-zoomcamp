@@ -130,3 +130,30 @@ gcloud auth activate-service-account --key-file $GOOGLE_APPLICATION_CREDENTIALS
 ### Port
 在ssh上启动了docker compose, 并且把port添加至vscode port界面，使port映射到localhost,那么在本地docker compose休眠或关闭状态，也可连接到ssh的docker compose中的postgres and pgAdmin. 
 
+## Setup Google Cloud SDK
+### Install SDK Package
+```bash
+mkdir .gcloud
+# Install
+wget https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-darwin-x86_64.tar.gz google-cloud-cli-darwin-x86_64.tar.gz 
+# Unpack
+tar xzfv google-cloud-cli-darwin-x86_64.tar.gz
+# Remove Installer
+rm google-cloud-cli-darwin-x86_64.tar.gz
+```
+
+### Initialize SDK
+```bash
+# Run installation script
+./google-cloud-sdk/install.sh
+# Initialize gcloud
+./google-cloud-sdk/bin/gcloud init
+```
+
+### Add Gcloud to PATH
+```bash
+nano .zshrc
+export CLOUD_SDK_HOME="${HOME}/.gcloud/google-cloud-sdk"
+export PATH="${CLOUD_SDK_HOME}/bin:${PATH}"
+source .zshrc
+```
