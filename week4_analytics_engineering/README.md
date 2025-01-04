@@ -82,13 +82,23 @@ Test is defined in `yaml` file for columns including:
    ```
 
 ### Documentation
+生成HTML格式的文档  
 ```dbt
 dbt docs generate
 ```
 
-### Build Table
+### Run Model
+有两种方式可以运行models(`models`文件下的`sql`file)
+1. `dbt run`
+   仅运行模型，不执行测试或者快照
+2. `dbt build`
+   综合执行多个任务: `dbt run` + `dbt test` + `dbt snapshot` + `dbt seed`  
+   适合构建完整的dbt project
+
+### Compile Model
+将Jinjia模版解析成SQL文件
 ```dbt
-dbt build
+dbt compile
 ```
 
 ### Install Packages
@@ -129,8 +139,8 @@ After installing `dbt-labs/codegen` in the `packages.yaml`, you can use the foll
 There two job types: normal job and CI job.  
 *Jobs run on the top of main branch in repo. Don't forget to push the changes to main branch.*
 
-Normal Job  
+1. Normal Job  
 It can be manually triggered or be triggered by schedules. 
 
-CI Job  
+2. CI Job  
 It's triggered by pull request in git repo
