@@ -349,7 +349,7 @@ next(list_inter)
 list(list_iter)
 # Output: [1,2,3]
 ```
-## Connect Spark to GCS
+## Connect Spark to GCS (Local Built-in Spark Cluster)
 ### Upload Data to GCS
 ```bash
 gsutil -m cp -r pq/ gs://nifty-structure-252803-terra-bucket/pq
@@ -364,7 +364,7 @@ mkdir lib/
 gsutil cp gs://hadoop-lib/gcs/gcs-connector-hadoop3-2.2.5.jar gcs-connector-hadoop3-2.2.5.jar
 ```
 
-### Connect Spark to GCS
+### Connect Spark to GCS (Local Built-in Spark Cluster)
 ```python
 # Import Packages
 import pyspark
@@ -406,7 +406,7 @@ df = spark.read.parquet()
 SparkContext._active_spark_context.stop()
 ```
 
-## Create a Local Spark Cluster
+## Create a Local Custom Spark Cluster
 ### Install Spark Standalone
 - Location `sbin` folder in `~/home/gabrielle/spark/spark-3.3.2-bin-hadoop3`
 ```bash
@@ -463,15 +463,54 @@ spark-submit \
 ```bash
 gsutil cp 08_local_spark_cluster.py gs://nifty-structure-252803-terra-bucket/code/08_local_spark_cluster.py
 ```
+### Submit Job in Console
+- Head to cluster page and click `Submit Job`
 - Copy the file path into `Main Python File` box
 - Add arguments to `Arguments` box
 ```bash
---input_green=gs://nifty-structure-252803-terra-bucket/pq2/green/2021/*/ \
---input_yellow=gs://nifty-structure-252803-terra-bucket/pq2/yellow/2021/*/ \
+--input_green=gs://nifty-structure-252803-terra-bucket/pq/green/2021/*/ 
+--input_yellow=gs://nifty-structure-252803-terra-bucket/pq/yellow/2021/*/ 
 --output=gs://nifty-structure-252803-terra-bucket/report-2021
 ```
 
+### Submit Job in `gcloud`
+- Add `Dataproc Admin` access to service account
+```bash
+gcloud dataproc jobs submit pyspark \
+    --cluster=de-zoomcamp-cluster \
+    --region=us-central1 \
+    gs://nifty-structure-252803-terra-bucket/code/08_local_spark_cluster.py \
+    -- \
+        --input_green=gs://nifty-structure-252803-terra-bucket/pq/green/2020/*/ \
+        --input_yellow=gs://nifty-structure-252803-terra-bucket/pq/yellow/2020/*/ \
+        --output=gs://nifty-structure-252803-terra-bucket/report-2020
+```
 
+## Connect Spark to BigQuery (Dataproc Cluster)
+### Update Parquet Write Command
+- Link: [09_spark_dataproc_cluster_bigquery](09_spark_dataproc_cluster_bigquery.py)
+```python 
+df_result.write.format('bigquery')\
+    .option("table", output) \
+    .save()
+```
+### Upload Python Script to GCS Bucket
+```bash
+gsutil cp 09_spark_dataproc_cluster_bigquery.py gs://nifty-structure-252803-terra-bucket/code/09_spark_dataproc_cluster_bigquery.py
+```
+### Submit Job in `gcloud` 
+```bash
+gcloud dataproc jobs submit pyspark \
+    --cluster=de-zoomcamp-cluster \
+    --region=us-central1 \
+    # For my VM, it doesn't like jars config, so I commented it out
+    # --jars=gs://spark-lib/bigquery/spark-bigquery-latest_2.12.jar \ 
+    gs://nifty-structure-252803-terra-bucket/code/09_spark_dataproc_cluster_bigquery.py \
+    -- \
+        --input_green=gs://nifty-structure-252803-terra-bucket/pq/green/2020/*/ \
+        --input_yellow=gs://nifty-structure-252803-terra-bucket/pq/yellow/2020/*/ \
+        --output=de_zoomcamp_dataset.report-2020
+```
 ## Additional Notes
 List all the file including hidden one
 ```bash
