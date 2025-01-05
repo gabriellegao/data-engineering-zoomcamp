@@ -1,12 +1,18 @@
 ## Pre-requisite 
 ### Move and Rename Credential File
-```bash mkdir ~/.google/credentials```
-```bash mv <path_to_your_credential_json_file> ~/.google/credentials/google_credential.json```
---> 把之前terraform section创建的service account credential重新命名，添加到新建的folder中
+把之前terraform section创建的service account credential重新命名，添加到新建的folder中  
+```bash
+bash mkdir ~/.google/credentials
+mv <path_to_your_credential_json_file> ~/.google/credentials/google_credential.json
+```
+
 
 ### Upgrade your docker-compose version to v2.x+
-```bash docker compose version```
-```output: Docker Compose version v2.30.3-desktop.1```
+```bash 
+docker compose version
+# Output: Docker Compose version v2.30.3-desktop.1
+```
+
 
 ### Set the memory for your Docker Engine to minimum 5GB (ideally 8GB)
 在Docker Desktop可以直接更改设置, 调整至5-8GB
