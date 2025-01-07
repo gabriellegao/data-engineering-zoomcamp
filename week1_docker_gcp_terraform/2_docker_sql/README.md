@@ -8,7 +8,7 @@ docker build -t <image_name> .
 ### Create Container
 Create a new container based on the image
 ```bash
-docker run -it <optional:container_name><image_name><karg>
+docker run -it <optional:container_name> <image_name> <karg>
 ```
 
 ### Execute Container
