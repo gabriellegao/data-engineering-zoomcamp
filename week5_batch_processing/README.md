@@ -406,16 +406,16 @@ df = spark.read.parquet()
 SparkContext._active_spark_context.stop()
 ```
 
-## Create a Local Custom Spark Cluster
-### Install Spark Standalone
-- Location `sbin` folder in `~/home/gabrielle/spark/spark-3.3.2-bin-hadoop3`
+## Create Standalone Spark Cluster
+### Start Master Node
+- Locate `sbin` folder in `~/home/gabrielle/spark/spark-3.3.2-bin-hadoop3`
 ```bash
 ./sbin/start-master.sh
 ```
 
 ### Ports
-- `8080`: Monitor Spark Jobs
-- `7077`: Master Port
+- `8080`: Monitor Spark Jobs, web-based monitoring dashboard
+- `7077`: Master Port, Master Node and Worker Node use this port for communication
 
 ### Initialize Worker/Slave Shell
 ```bash
@@ -429,9 +429,11 @@ jupyter nbconvert --to=script <notebook_name>
 ```
 
 ### Run Python Script
+Setup `PYTHONPATH` before running python script 
 ```bash
 export PYTHONPATH="${SPARK_HOME}/python/:$PYTHONPATH"
 export PYTHONPATH="${SPARK_HOME}/python/lib/py4j-0.10.9.5-src.zip:$PYTHONPATH"
+# Run python script
 python <notebook_name>
 ```
 
