@@ -26,6 +26,7 @@ class Ride:
 
     @classmethod
     def from_dict(cls, d: Dict):
+        # Return format: Ride([123,...])
         return cls(arr=[
             d['vendor_id'],
             d['tpep_pickup_datetime'][0],
@@ -49,4 +50,6 @@ class Ride:
         )
 
     def __repr__(self):
+        # Printed format: obejct:{dict}
+        # Real format: object(vendor_id=123)
         return f'{self.__class__.__name__}: {self.__dict__}'

@@ -17,10 +17,13 @@ class JsonConsumer:
         while True:
             try:
                 # SIGINT can't be handled when polling, limit timeout to 1 second.
+                # Output format: binary -> dict of list(object(list))
                 message = self.consumer.poll(1.0)
                 if message is None or message == {}:
                     continue
+                # Output format of message_value: list of object
                 for message_key, message_value in message.items():
+                    # Output format of msg_val: object
                     for msg_val in message_value:
                         print(msg_val.key, msg_val.value)
             except KeyboardInterrupt:
@@ -34,7 +37,9 @@ if __name__ == '__main__':
         'bootstrap_servers': BOOTSTRAP_SERVERS,
         'auto_offset_reset': 'earliest',
         'enable_auto_commit': True,
+        # Convert messages from binary to int
         'key_deserializer': lambda key: int(key.decode('utf-8')),
+        #Comvert messages from binary -> json -> dict -> object(list)
         'value_deserializer': lambda x: loads(x.decode('utf-8'), object_hook=lambda d: Ride.from_dict(d)),
         'group_id': 'consumer.group.id.json-example.1',
     }

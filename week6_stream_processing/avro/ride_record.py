@@ -12,6 +12,7 @@ class RideRecord:
 
     @classmethod
     def from_dict(cls, d: Dict):
+        # Return format: Riderecord([123,...])
         return cls(arr=[
             d['vendor_id'],
             d['passenger_count'],
@@ -22,15 +23,19 @@ class RideRecord:
         )
 
     def __repr__(self):
+        # Printed format: obejct:{dict}
+        # Real format: object(vendor_id=123)
         return f'{self.__class__.__name__}: {self.__dict__}'
 
 
 def dict_to_ride_record(obj, ctx):
     if obj is None:
         return None
-
+    # data flow: from_dict -> __init__ -> __repr__
     return RideRecord.from_dict(obj)
 
 
 def ride_record_to_dict(ride_record: RideRecord, ctx):
+    # Input is an instance: RideRecord(vendor_=123,...), flowing into __init__
+    # Output format: {dict}
     return ride_record.__dict__

@@ -19,12 +19,18 @@ class JsonProducer(KafkaProducer):
             reader = csv.reader(f)
             header = next(reader)  # skip the header row
             for row in reader:
+                # Call Ride class, adding row as array
+                # Convert each array to object:{dict}
                 records.append(Ride(arr=row))
+        # Printed output format: list of object:{dict}
+        # Real outut format: list of object(vendor_id=123)
         return records
 
     def publish_rides(self, topic: str, messages: List[Ride]):
+        # Input format of messages: list of object(vendor_id=123)
         for ride in messages:
             try:
+                # Convert each object to binary
                 record = self.producer.send(topic=topic, key=ride.pu_location_id, value=ride)
                 print('Record {} successfully produced at offset {}'.format(ride.pu_location_id, record.get().offset))
             except KafkaTimeoutError as e:
@@ -35,7 +41,9 @@ if __name__ == '__main__':
     # Config Should match with the KafkaProducer expectation
     config = {
         'bootstrap_servers': BOOTSTRAP_SERVERS,
+        # Conver messages to binary format
         'key_serializer': lambda key: str(key).encode(),
+        # Conver messages to binary format
         'value_serializer': lambda x: json.dumps(x.__dict__, default=str).encode('utf-8')
     }
     producer = JsonProducer(props=config)

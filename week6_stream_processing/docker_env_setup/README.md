@@ -33,5 +33,9 @@ Link: [jupyterlab.Dockerfile](spark_java_python_docker/jupyterlab.Dockerfile)
 Build above images.  
 Link: [build.sh](spark_java_python_docker/build.sh)
 
-### *Attention*
-*Run `build.sh` first to build all custom images, then run `docker-compose.yaml` to create containers.*
+### Command
+- Build all base images
+```bash
+./build.sh
+```
+*Run `./build.sh` first to build all custom images, then run `docker-compose.yaml` to create containers.*
