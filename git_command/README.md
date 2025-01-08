@@ -12,3 +12,9 @@ git push -u origin branch-name
 ```bash
 git branch -r
 ```
+
+#### Rename Main Branch
+```bash
+# This command works for just-created repo
+git branch -M main
+```
