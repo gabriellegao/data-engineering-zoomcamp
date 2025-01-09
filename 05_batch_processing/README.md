@@ -198,7 +198,7 @@ Stage 2
 ### Definition of RDD
 - Resilient: Fault-tolerant and capable of recomputing lost data from the lineage (a history of transformations used to build the dataset).
 - Distributed: The data is divided across multiple nodes in a cluster, enabling parallel processing.
-- Dataset: A collection of records, where each record can be an object, such as a row in a dataset.
+- Dataset: A collection (list) of records, where each record can be an object, such as a row in a dataset.
 ### Where in DataFrame vs. Filter in RDD
 
 - Define a filter function `filter_func`
