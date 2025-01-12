@@ -3,22 +3,23 @@
 mkdir ~/.ssh
 
 ### Create SSH keys for google cloud
+Return two keys: gcp (private key) and gcp.pub (public key)  
+Public key to lock the VM, and privaye key to unlock the VM 
 ```bash
 ssh-keygen -t rsa -f ~/.ssh/gcp -C gabrielle -b 2048 
 ``` 
---> return two keys: gcp (private key) and gcp.pub (public key)   
---> public key to lock the VM, and privaye key to unlock the VM
 
 ### Upload the SSH key to Metadata under Compute Engine
+Paste the output in SSH Keys box to lock VM
+```bash
 cat gcp.pub
---> paste the output in SSH Keys box
---> to lock the VM
+```
 
 ### Connect SSH and VM
+Unlock the VM on your local machine
 ```bash
 ssh -i ~/.ssh/gcp gabrielle@<external_ip_address>
 ```
---> unlock the VM on your local machine
 
 ### Create Config File
 ```bash
@@ -41,10 +42,11 @@ wget https://repo.anaconda.com/archive/Anaconda3-2021.11-Linux-x86_64.sh
 bash Anaconda3-2021.11-Linux-x86_64.sh
 ```
 ### Apply Changes in `.bashrc`
+这个command的作用在于，让当前终端重新加载`.bashrc`文件内的所有设置，无需关闭或者重启终端  
 ```bash
 source .bashrc
 ```
---> 这个command的作用在于，让当前终端重新加载`.bashrc`文件内的所有设置，无需关闭或者重启终端
+
 
 ### Login to SSH
 ```bash
@@ -108,7 +110,8 @@ sudo apt-get install python-dev libpq-dev libevent-dev
 pip install pgcli
 ```
 
-### Google Cloud CLI
+## Google Cloud CLI and Terraform
+### Google CLoud CLI Setup
 - Move credential json file from local machine to google cloud
 ```bash
 cd ~/.google/credentials/ # Locate the json file
@@ -125,7 +128,20 @@ export GOOGLE_APPLICATION_CREDENTIALS=~/.google/credentials/google_credentials.j
 ```bash
 gcloud auth activate-service-account --key-file $GOOGLE_APPLICATION_CREDENTIALS
 ```
-
+### Terraform Setup
+Go to location whhere `main.tf` and `variables.tf` store
+```bash
+# Initialize terraform
+terraform init
+```
+Generate exectution plan
+```bash
+terraform plan
+```
+Execute plan, applying changes and modify infrastructure
+```bash
+terraform apply
+```
 
 ### Port
 在ssh上启动了docker compose, 并且把port添加至vscode port界面，使port映射到localhost,那么在本地docker compose休眠或关闭状态，也可连接到ssh的docker compose中的postgres and pgAdmin. 
