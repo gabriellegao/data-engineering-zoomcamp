@@ -18,3 +18,13 @@ git branch -r
 # This command works for just-created repo
 git branch -M main
 ```
+
+#### Revoke Previous Commit
+```bash
+git reset --soft HEAD~1
+```
+
+#### Remove Files from Staging
+```bash
+git rm --cached path/to/large-file
+```
