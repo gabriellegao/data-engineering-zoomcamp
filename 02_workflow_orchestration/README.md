@@ -20,7 +20,9 @@ Setting -> Resources -> Advanced -> Memory Limit
 
 ## Airflow Setup
 ### Creat a new folder named `airflow` in your current directory or your project directory
-```bash mkdir ~/<path_to_your_project_directory>/airflow```
+```bash 
+mkdir ~/<path_to_your_project_directory>/airflow
+```
 
 ### Import official `docker-compose.yaml` file
 ```bash 
@@ -28,10 +30,11 @@ curl -LfO 'https://airflow.apache.org/docs/apache-airflow/stable/docker-compose.
 ```
 
 ### Create three new folders
+在airflow文件下，创建`dags`,`logs`,`plugs`
 ```bash 
 mkdir -p ./dags ./logs ./plugins
 ```
---> 在airflow文件下，创建`dags`,`logs`,`plugs`
+
 
 ### Setup `AIRFLOW_UID`
 ```bash 
@@ -55,17 +58,17 @@ echo -e "AIRFLOW_UID=$(id -u)" > .env
 
 ## Execution
 ### Build Docker Image
+读取`docker-compose.yaml`中指定的`Dockerfile`, 并创建镜像
 ```bash 
 docker-compose build
 ```
---> 读取`docker-compose.yaml`中指定的`Dockerfile`, 并创建镜像
 
 ### Initialize Airflow Settings
+初始化 Airflow 数据库和必要的配置  
+启动docker-compose.yaml 中定义的 airflow-init 服务  
 ```bash 
 docker-compose up airflow-init
 ```
---> 初始化 Airflow 数据库和必要的配置
---> 启动docker-compose.yaml 中定义的 airflow-init 服务
 
 ### Kick Off All Services
 ```bash 
