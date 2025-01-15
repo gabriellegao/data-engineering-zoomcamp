@@ -144,3 +144,29 @@ It can be manually triggered or be triggered by schedules.
 
 2. CI Job  
 It's triggered by pull request in git repo
+
+## DBT and BigQuery on Docker
+### Setup
+Create a folder to store all required files
+```bash
+mkdir <dir-name>
+cd <dir-name>
+```
+### Dockerfile
+[Dockerfile](docker/Dockerfile)
+### Docker Compose YAML
+[docker-compose.yaml](docker/docker-compose.yaml)
+### Profiles YAML
+[profile.yml](docker/.dbt/profiles.yml)
+### Build Image and Containers
+```bash
+docker compose build 
+docker compose run dbt-bq-dtc init
+```
+*Attention*  
+*In `dbt_project.yml`, replace `profile: 'taxi_rides_ny'` with `profile: 'bq-dbt-workshop'` as we have a profile with the later name in our `profiles.yml`*
+### Test Connection
+```bash
+docker compose run --workdir="//usr/app/dbt/taxi_rides_ny" dbt-bq-dtc debug
+# Output: All checks passed!
+```
