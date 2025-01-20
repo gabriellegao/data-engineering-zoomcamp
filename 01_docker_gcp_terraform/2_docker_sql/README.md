@@ -1,6 +1,6 @@
 ## Docker Basics
 ### Build Image 
-In default, Docker only looks for the file named Dockerfile
+In default, Docker only looks for the file named `Dockerfile`
 ```bash
 docker build -t <image_name> .
 ```

@@ -71,8 +71,8 @@ export PYTHONPATH="${SPARK_HOME}/python/lib/py4j-0.10.9.5-src.zip:$PYTHONPATH"
 
 ## PySpark Script
 ### Port
-Add port `8888` to port pannel in vscode. This port links to Jupyter Notebook
-Add port `4040` to port pannel in vscode. This port links to Spark Job webppage.
+- Add port `8888` to port pannel in vscode. This port links to Jupyter Notebook
+- Add port `4040` to port pannel in vscode. This port links to Spark Job webppage.
 
 ### Download Taxi Zone Data
 Download this file in Jupyter Notebook
@@ -104,7 +104,7 @@ df.write.parquet('zones')
 ```
 
 ### Schema Commands
-- Define Schema
+Define Schema
 ```python
 # Import schema required packages
 from pyspark.sql.types import StructType, StructField, StringType, TimestampType, IntegerType
@@ -117,7 +117,7 @@ schema = StructType([
     StructField('PULocationID', IntegerType(), True), 
     StructField('DOLocationID', IntegerType(), True)])
 ```
-- Print Schema
+Print Schema
 ```python
 df.schema
 df.printSchema()
@@ -252,11 +252,13 @@ def calculate_sum(left_value, right_value):
     return (output_amount, output_count)
 ```
 - Call functions: `key_value_func` and `calculate_sum`
+- `map()` is a tranformation method, applying functions to each row in RDD
 ```python
 rdd\
     .map(key_value_func)\
     .reduceByKey(calculate_sum)
-# Output:[((key1,key2), (value1, value2))((...),(...))]
+# Output:[((key1, key2), (value1, value2))((...),(...))]
+# (key1, key2) is composite key, (value1, value2) is composite value
 ```
 ### RDD to DataFrame: Map and ToDF
 - Define a `unwrap` function to format each row 
@@ -350,6 +352,8 @@ list(list_iter)
 # Output: [1,2,3]
 ```
 ## Connect Spark to GCS (Local Built-in Spark Cluster)
+### Notebook
+[07_local_spark_gcs](07_local_spark_gcs.ipynb)
 ### Upload Data to GCS
 ```bash
 gsutil -m cp -r pq/ gs://nifty-structure-252803-terra-bucket/pq
@@ -407,6 +411,8 @@ SparkContext._active_spark_context.stop()
 ```
 
 ## Create Standalone Spark Cluster
+### Python Script
+[08_standalone_spark.py](08_standalone_spark_cluster.py)
 ### Start Master Node
 - Locate `sbin` folder in `~/home/gabrielle/spark/spark-3.3.2-bin-hadoop3`
 ```bash
@@ -447,9 +453,8 @@ python 08_local_spark_cluster.py \
     --output=data/report/report-2020
 ```
 
-### Run Python Script with Args and Master URL
-- Submit Spark Jobs to Spark Cluster
-- Link: [08_local_spark.py](08_local_spark.py)
+### Submit Spark Jobs with Args and Master URL
+Run python script with args and submit Spark Jobs to Spark Cluster
 ```bash
 URL="spark://de-zoomcamp.us-central1-c.c.nifty-structure-252803.internal:7077"
 spark-submit \
@@ -475,7 +480,7 @@ gsutil cp 08_local_spark_cluster.py gs://nifty-structure-252803-terra-bucket/cod
 --output=gs://nifty-structure-252803-terra-bucket/report-2021
 ```
 
-### Submit Job in `gcloud`
+### Submit Job in Shell `gcloud`
 - Add `Dataproc Admin` access to service account
 ```bash
 gcloud dataproc jobs submit pyspark \
@@ -489,8 +494,9 @@ gcloud dataproc jobs submit pyspark \
 ```
 
 ## Connect Spark to BigQuery (Dataproc Cluster)
+### Python Script
+[09_spark_dataproc_cluster_bigquery](09_spark_dataproc_cluster_bigquery.py)
 ### Update Parquet Write Command
-- Link: [09_spark_dataproc_cluster_bigquery](09_spark_dataproc_cluster_bigquery.py)
 ```python 
 df_result.write.format('bigquery')\
     .option("table", output) \
@@ -567,7 +573,7 @@ lambda arguments: expression
 squared = lambda x: x**2
 print(squared(5)) #output: 25
 ```
-- Convert Jupyter Notebook to Python Script
+  Convert Jupyter Notebook to Python Script
 ```bash
 jupyter nbconvert --to=script <notebook_name>
 ```

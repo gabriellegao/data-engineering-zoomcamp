@@ -66,7 +66,7 @@ class RideAvroProducer:
                 # Input format: RideRecordKey(vendor_id=123)
                 # Output format: RideRecordKey:{'vendor_id':123}
                 ride_keys.append(RideRecordKey(vendor_id=int(row[0])))
-        # 1 to 1 match
+        # zip(): 1 to 1 match
         """
         Output format
         [
