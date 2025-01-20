@@ -64,13 +64,13 @@ docker-compose build
 ```
 
 ### Initialize Airflow Settings
-初始化 Airflow 数据库和必要的配置  
-启动docker-compose.yaml 中定义的 airflow-init 服务  
+初始化 Airflow 数据库和必要的配置, 并根据 `depends_on` 配置，确保 `redis` 和 `postgres` 服务先运行,且启动 `docker-compose.yaml` 中定义的 `airflow-init` 服务。  
 ```bash 
 docker-compose up airflow-init
 ```
 
 ### Kick Off All Services
+启动 `docker-compose.yaml` 中定义的所有服务（除了 `airflow-init`, 因为它已经完成了任务并退出）
 ```bash 
 docker-compose up
 ```
@@ -79,6 +79,21 @@ docker-compose up
 1. `airflow-worker`: 执行任务（当使用 CeleryExecutor 时）
 1. `redis`: 用作任务队列的消息代理
 1. `postgres`: 用作 Airflow 的元数据库
+
+### Service Diagram
+docker compose build  
+$\quad$  ↓  
+docker compose up airflow-init  
+  ├── 启动 redis  
+  ├── 启动 postgres  
+  └── 运行 airflow-init 完成初始化  
+$\quad$  ↓  
+docker compose up  
+  ├── 启动 airflow-webserver  
+  ├── 启动 airflow-scheduler  
+  ├── 启动 airflow-worker  
+  └── 启动 flower  
+
 
 ***如果环境变量发生改变，需按照以上三步重新启动docker***
 

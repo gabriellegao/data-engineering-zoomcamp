@@ -10,24 +10,24 @@ ETL or ELT is composed of three main stages - extract, transform, and load.
 
 ## Dimensisonal Modeling
 ### Elements of Dimensional Modeling
-Facts table  
-Dimension table
+- Facts table  
+- Dimension table
 ### Architecture of Dimensional Modeling
-Stage area
-Processing area
-Presentation area
+- Stage area  
+- Processing area  
+- Presentation area  
 
 ## DBT
 dbt (data build tool) is designed to tranform raw data to ready-to-use data using SQL. dbt also provides functionalities, like deployment (version control and CI/CD), test and document, and development
 
 ### Materializations
-1. Ephemeral
+1. Ephemeral  
    It's a temporary view and only exist during a single dbt run
-2. View
+2. View  
    View is a query-based table built on the top of the real table
-3. Table
+3. Table  
    Table is physical representation of data that are created and stored in the database
-4. Incremental
+4. Incremental  
    Incremental materialization decribe a process of incrementally loading new data to the existing table without dropping the whole table and recreate it again.
 
 ### Macro
@@ -50,6 +50,14 @@ Variable defines value used across the project. It can be defined in two ways:
 {{ var('variable_value') }}
 ```
 
+### From Statment
+There are two formats of from statement
+1. `{{ source('staging','external_green_tripdata') }}`  
+   This command is to call external tables and views that are not stored or controlled by dbt.  
+   `staging` represents external database name and schema name and is defined in `schema.yaml`.
+2. `{{ ref('stg_external_green_tripdata') }}`  
+   This command is to call internal tables and view that are store or controlled by dbt.
+
 ### Test
 Test is defined in `yaml` file for columns including:
 1. Unique
@@ -60,7 +68,7 @@ Test is defined in `yaml` file for columns including:
    ```
 2. Not Null
    ```dbt
-   test:
+   tests:
      - not_null:
         severity: warn
    ```
@@ -89,11 +97,10 @@ dbt docs generate
 
 ### Run Model
 有两种方式可以运行models(`models`文件下的`sql`file)
-1. `dbt run`
+1. `dbt run`  
    仅运行模型，不执行测试或者快照
-2. `dbt build`
-   综合执行多个任务: `dbt run` + `dbt test` + `dbt snapshot` + `dbt seed`  
-   适合构建完整的dbt project
+2. `dbt build`  
+   综合执行多个任务: `dbt run` + `dbt test` + `dbt snapshot` + `dbt seed`, 适合构建完整的dbt project
 
 ### Compile Model
 将Jinjia模版解析成SQL文件
