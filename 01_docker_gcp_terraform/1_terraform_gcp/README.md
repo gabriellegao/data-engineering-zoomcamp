@@ -1,6 +1,8 @@
 ## Setup SSH
 ### Create .ssh folder
+```bash
 mkdir ~/.ssh
+```
 
 ### Create SSH keys for google cloud
 Return two keys: gcp (private key) and gcp.pub (public key)  

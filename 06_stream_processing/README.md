@@ -29,11 +29,10 @@ One consumer can read from multiple partitions.
 If one consumer fails, Kafaka will direct the partition to another consumer in the same consumer group.  
 #### Partition and Key
 Messages in Kafka topics are divided into partitions using keys.
-The formula below determins which partition layer the message should go to.
+The formula below apply hash function on keys to determine which partition layer the message should go to.
 ```bash
 partition = hash(key) % number_of_partitions
 ```
-
 
 ### Offset
 The offset is the order of messages in a partition, like 0,1,2... 
@@ -54,7 +53,7 @@ Acks is producer configuration setting that determines how many nodes replicas m
 - Acks 1: Leader node acknolwdge write before sending data to followers.
 - Acks All: Leader node and follower nodes acknowledge write.
 
-## Pre-requisite for Standalone Spark Cluster on Docker
+## Pre-requisite for Creating Standalone Spark Cluster and Kafka Clusteron Docker
 ### Environments 
 To setup the Apache Spark in standalone mode using Docker, the following software stacks are required:
 - Python 3.7 with PySpark 3.0.0
@@ -231,7 +230,9 @@ After deserialization, the key is integer and the value is object
 Key: 1, Value: RideRecord(vendor_id=2, passenger_count=3, trip_distance=10.5)
 Key: 2, Value: RideRecord(vendor_id=3, passenger_count=2, trip_distance=7.8)
 ```
-
+## Pyspark Streaming Processing
+After installing docker images and starting all services, we can run `producer.py`, `consumer.py` and `streaming.py`.  
+For more information, read [README.md](pyspark/README.md)
 ## Additional Notes
 ### Pass Args to Shell Script
 #### Method 1: `--build-arg`

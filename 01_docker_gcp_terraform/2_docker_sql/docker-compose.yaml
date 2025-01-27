@@ -20,8 +20,14 @@ services:
       - PGADMIN_DEFAULT_PASSWORD=root
     ports:
       - "8080:80"
+# 这里引用的是外部网络（已经提前创建好的网络）
+networks: #全局网略定义
+  airflow: #Yaml内部网络名称
+    external: #声明这是一个外部网络
+      name: airflow_default #创建外部网络时，用的网络名称
 
-networks:
-  airflow:
-    external:
-      name: airflow_default
+# 如果没有创建提前创建网络，可以用以下写法
+
+# networks:
+#   airflow:
+#     driver: bridge
