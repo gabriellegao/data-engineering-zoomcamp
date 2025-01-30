@@ -30,3 +30,40 @@ Data from multiple tables is consolidated into fewer tables or a single table, o
 
 ## ML Algorithm Diagram
 ![ML Algorithm Diagram](ml-alg-dgm.png)
+
+## Additional Notes
+### Assign More Resource to Task
+```python
+BashOperator(
+        task_id="taskB",
+        bash_command="sleep 30",  # 假设 taskB 耗时较长
+        resources={"cpus": 2, "memory": 2048},  # 分配更多资源
+    )
+```
+### Pass Parameters from Main Dag to Sub Dag
+Main DAG
+```python
+# 用TriggerDagRunOperator唤醒Sub Dag
+trigger_sub_dag = TriggerDagRunOperator(
+            task_id=f'trigger_subdag_{year}',
+            trigger_dag_id='sub_dag',
+            # 在conf里定义year参数
+            conf={'year': year},  # 传递年份参数
+            wait_for_completion=True
+        ) 
+```
+Sub DAG
+```python
+def parse_year(**kwargs):
+    # 解析主 DAG 传递的年份参数
+    dag_run_conf = kwargs['dag_run'].conf
+    # 获取year value, 如果不存在返回unknown
+    year = dag_run_conf.get('year', 'unknown')
+    return year
+
+parse_year_task = PythonOperator(
+        task_id="parse_year",
+        python_callable=parse_year,
+        provide_context=True
+    )
+```

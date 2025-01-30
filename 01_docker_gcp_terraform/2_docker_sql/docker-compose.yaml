@@ -1,7 +1,7 @@
 # Combine pgadmin and pgdatabase into one yml file
 # The docker-compose.yml automatically create network, pgdatabase and pgadmin.
 services:
-  pgdatabase:
+  pgdatabase: #host name
     image: postgres:13
     environment:
       - POSTGRES_USER=root
@@ -13,7 +13,7 @@ services:
       - "5432:5432"
     networks:
       - airflow
-  pgadmin:
+  pgadmin: #host name
     image: dpage/pgadmin4
     environment:
       - PGADMIN_DEFAULT_EMAIL=admin@admin.com

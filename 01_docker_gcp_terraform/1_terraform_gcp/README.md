@@ -180,3 +180,52 @@ source .zshrc
 ```bash
 gcloud compute instances start de-zoomcamp --zone=<ZONE>
 ```
+
+## Additional Notes
+### Terraform: `count.index`
+```h
+resource "google_compute_instance" "vm" {
+  count = 3
+  name  = "my-vm-${count.index + 1}"
+}
+```
+- `vm`: define internal name of this virtual machine.  
+- `count.index`: subfix of instance, `my-vm-0`, `my-vm-1` and `my-vm-2`.  
+- `name=`: specify external name of this instance
+### Terraform: `for_each`
+`for_each` has the same function as `count`.
+```h
+resource "google_compute_instance" "vm" {
+  for_each = toset(["vm-1", "vm-2", "vm-3"])
+  name     = each.key
+}
+```
+### Terraform: `metadata-startup_script`
+```h
+resource "google_compute_instance" "vm_with_docker" {
+  name         = "docker-vm"
+  machine_type = "e2-medium"
+  zone         = "us-central1-a"
+
+  boot_disk {
+    initialize_params {
+      image = "projects/debian-cloud/global/images/debian-10-buster-v20210817"
+    }
+  }
+
+  metadata_startup_script = <<-EOT
+    #!/bin/bash
+    apt-get update
+    apt-get install -y docker.io
+    systemctl start docker
+    systemctl enable docker
+  EOT
+}
+```
+### Terraform Commands
+```bash
+# 管理状态文件
+terraform backend
+# 导入部署资源信息
+terraform import
+```

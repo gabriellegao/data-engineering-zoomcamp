@@ -39,7 +39,8 @@ docker network ls # should list kafka-spark-network
 ### Create Kafka Topic 
 This command is to config Kafka topic. After running this command, we can parse topic as an argument into`producer.py` and `consumer.py`.  
 ```bash
-docker exec -it broker kafka-topics.sh --create \
+docker exec -it broker kafka-topics.sh \
+  --create \
   --topic rides_csv \
   --partitions 3 \
   --replication-factor 1 \

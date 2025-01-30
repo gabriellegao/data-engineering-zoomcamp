@@ -131,3 +131,37 @@ environment:
 
 ### Schedule Expression Generator
 [Crontab Guru](https://crontab.guru/)
+
+### Airlfow Xcom
+```python
+from airflow.operators.python import PythonOperator
+
+def push_xcom_value(**kwargs):
+    kwargs['ti'].xcom_push(key='my_key', value='my_value')
+
+def pull_xcom_value(**kwargs):
+    value = kwargs['ti'].xcom_pull(task_ids='push_task', key='my_key')
+    print(f"Received XCom Value: {value}")
+
+push_task = PythonOperator(
+    task_id='push_task',
+    python_callable=push_xcom_value,
+    provide_context=True
+)
+
+pull_task = PythonOperator(
+    task_id='pull_task',
+    python_callable=pull_xcom_value,
+    provide_context=True
+)
+
+push_task >> pull_task
+```
+### Check Airflow Task Status
+```bash
+docker-compose ps            # 检查所有服务
+docker-compose logs scheduler  # 查看 Scheduler 日志
+airflow dags list            # 列出所有 DAG
+airflow tasks list <dag_id>   # 查看 DAG 里的任务
+airflow tasks test <dag_id> <task_id> <execution_date>  # 运行单个任务
+```

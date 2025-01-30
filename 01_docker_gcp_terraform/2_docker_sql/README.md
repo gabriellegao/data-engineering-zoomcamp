@@ -1,20 +1,23 @@
 ## Docker Basics
 ### Build Image 
 In default, Docker only looks for the file named `Dockerfile`
-```bash
+```docker
 docker build -t <image_name> .
 ```
 
 ### Create Container
 Create a new container based on the image
-```bash
-docker run -it <optional:container_name> <image_name> <karg>
+```docker
+docker run -it \
+  <--entrypoint=> \
+  <--name=optional:container_name> \
+  <image_name> <**karg>
 ```
 
 ### Execute Container
 Open and enter the bash shell in existing container
-```bash
-docker exec -it <container_id> bash
+```docker
+docker exec -it <container_name> bash
 ```
 
 ### List All Running Containers
@@ -62,6 +65,8 @@ pgcli -h pgdatabase -p 5432 -u root -d ny_taxi
 ## Docker Network
 ### Why Docker Network?
 Docker network benefits communications among inside container. 
+- `bridge`: 多个容器在同一个 Docker 主机上相互通信，但又与外部网络隔离
+- `hotst`: 容器与主机的网络环境无隔离
 ### Create Docker Netwowrk
 ```bash
 docker network create pg-network
@@ -69,7 +74,7 @@ docker network create pg-network
 
 ### Run Postgress in Network
 - Create a container upon the image `postgres:13`, and set the user name and password for identity verification.   
-- `pg-database`看守着`5432`这个门，任何想要进入`5432`的行为，都需要先通过身份验证
+- Host `pg-database`看守着 port `5432`这个门，任何想要进入`5432`的行为，都需要先通过身份验证
 ```bash
 docker run -it \
   -e POSTGRES_USER="root" \
@@ -78,7 +83,7 @@ docker run -it \
   -v $(pwd)/ny_taxi_postgres_data:/var/lib/postgresql/data \
   -p 5432:5432 \
   --network=pg-network \
-  --name pg-database \
+  --name=pg-database \
   postgres:13
 ```
 
