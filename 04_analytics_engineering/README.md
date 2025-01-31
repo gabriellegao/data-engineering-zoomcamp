@@ -1,12 +1,12 @@
 ## ETL vs ELT
 ETL or ELT is composed of three main stages - extract, transform, and load. 
 ### ETL
-1. Slight more stable and compliant data analysis
-2. Higher storage and compute costs
+- Slight more stable and compliant data analysis
+- Higher storage and compute costs
 
 ### ELT
-1. Faster and more flexible data analysis
-2. Lower cost and lower maintenance.
+- Faster and more flexible data analysis
+- Lower cost and lower maintenance.
 
 ## Dimensisonal Modeling
 ### Elements of Dimensional Modeling
@@ -21,14 +21,13 @@ ETL or ELT is composed of three main stages - extract, transform, and load.
 dbt (data build tool) is designed to tranform raw data to ready-to-use data using SQL. dbt also provides functionalities, like deployment (version control and CI/CD), test and document, and development
 
 ### Materializations
-1. Ephemeral  
-   It's a temporary view and only exist during a single dbt run
-2. View  
-   View is a query-based table built on the top of the real table
-3. Table  
-   Table is physical representation of data that are created and stored in the database
-4. Incremental  
-   Incremental materialization decribe a process of incrementally loading new data to the existing table without dropping the whole table and recreate it again.
+- Ephemeral: It's a temporary view and only exist during a single dbt run
+
+- View: View is a query-based table built on the top of the real table
+
+- Table: Table is physical representation of data that are created and stored in the database
+
+- Incremental: Incremental materialization decribe a process of incrementally loading new data to the existing table without dropping the whole table and recreate it again.
 
 ### Macro
 Macro is a function acted like def function in python
@@ -59,35 +58,41 @@ There are two formats of from statement
    This command is to call internal tables and view that are store or controlled by dbt.
 
 ### Test
-Test is defined in `yaml` file for columns including:
-1. Unique
-   ```dbt
-   tests:
-     - unique:
-        severity: warn
-   ```
-2. Not Null
-   ```dbt
-   tests:
-     - not_null:
-        severity: warn
-   ```
-3. Accepted Value
-   ```dbt
-   tests:
-    - accepted_values:
-        values: "{{ var('payment_type_values') }}"
-        severity: warn
-        quote: false
-   ```
-4. Relationships to other materializations
-   ```dbt
-   tests:
-     - relationships:
-       to: ref('taxi_zone_lookup')
-       field: locationid
-       severity: warn
-   ```
+Test is defined in `yaml` file for columns including:  
+
+Unique
+```dbt
+tests:
+  - unique:
+     severity: warn
+```
+Not Null
+```dbt
+tests:
+  - not_null:
+     severity: warn
+```
+Accepted Value
+```dbt
+tests:
+ - accepted_values:
+     values: "{{ var('payment_type_values') }}"
+     severity: warn
+     quote: false
+```
+Relationships to other materializations
+```dbt
+tests:
+  - relationships:
+      to: ref('taxi_zone_lookup')
+      field: locationid
+      severity: warn
+```
+Values greater than or equal to 0
+```dbt
+tests:
+  - test_positive_or_zero
+```
 
 ### Documentation
 生成HTML格式的文档  
@@ -151,6 +156,15 @@ It can be manually triggered or be triggered by schedules.
 
 2. CI Job  
 It's triggered by pull request in git repo
+
+## DBT Common Commands
+```dbt
+dbt debug   # 先检查环境和数据库连接是否正确
+dbt seed    # 如果有种子数据，先加载
+dbt run     # 运行模型
+dbt test    # 运行测试
+dbt build   # 综合执行 run、test、snapshot
+```
 
 ## DBT and BigQuery on Docker
 ### Setup
