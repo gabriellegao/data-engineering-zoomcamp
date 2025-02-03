@@ -18,5 +18,5 @@ for MONTH in {1..12}; do
     echo "downloading ${URL} to local path ${LOCAL_PATH}"
     wget ${URL} -O ${LOCAL_PATH}
 
-    # gzip ${LOCAL_PATH} #unzip file
+    gzip ${LOCAL_PATH} #unzip file
 done

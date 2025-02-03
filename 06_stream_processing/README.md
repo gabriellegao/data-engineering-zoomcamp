@@ -230,6 +230,14 @@ After deserialization, the key is integer and the value is object
 Key: 1, Value: RideRecord(vendor_id=2, passenger_count=3, trip_distance=10.5)
 Key: 2, Value: RideRecord(vendor_id=3, passenger_count=2, trip_distance=7.8)
 ```
+
+### Read Data from Assigned Partition
+Use `assign()` to subscribe to the specific topic and partition
+```python
+consumer = KafkaConsumer()
+consumer.assign([TopicPartition(topic, partition)])
+```
+
 ## Pyspark Streaming Processing
 After installing docker images and starting all services, we can run `producer.py`, `consumer.py` and `streaming.py`.  
 For more information, read [README.md](pyspark/README.md)

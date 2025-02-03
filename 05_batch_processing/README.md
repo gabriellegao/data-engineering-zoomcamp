@@ -167,9 +167,10 @@ We need to split the data file to multiple partition.
 The Driver Node assigns each partition to each Worker Node, and Worker Node process the job.  
 After completing the job, the Worker Node will be assigned next job and process it again until all the jobs are finished.
 
-### Spark GroupBy
+### Spark ReduceByKey
 Stage 1
    - Process data in each partition with filter and groupby. 
+   - Perform a pre-aggregation (e.g. sum) in each partition
    - Output the result for each partition
 
 Intermediate Stage
@@ -178,7 +179,7 @@ Intermediate Stage
    - The algorithm of Reshuffling is called External Merge Sort
   
 Stage 2 
-   - Place the same groupby into one block (partition).
+   - Receive and store the same groupby into one block (partition).
    - Complete the rest of jobs (e.g. aggregation) 
 ### Spark Join
 Stage 1
@@ -239,8 +240,8 @@ def key_value_func(row):
     
     return (key,value)
 ```
-- Calculate Sum
 - Sum up values (composite value) with the same key (composite key)
+- 不断地 pairwise（两两）调用你提供的函数来做合并
 ```python
 def calculate_sum(left_value, right_value):
     left_amount, left_count = left_value
@@ -303,6 +304,7 @@ rdd.mapPartition(func)
 ### Map vs. MapPartition
 - Map process RDD by row
 - MapPartition process RDD by partition
+- 这两种方法返回的结果, 需是一行一行的数据, 而不是整个dataframe
 
 ### RDD to Pandas DataFrame
 ```python
@@ -318,6 +320,7 @@ df = pd.DataFrame(rows, columns = columns)
   - Yield here add each row into a iterator  
 - Itertuples
   - Used only for Panda DataFrame, iterating each row
+- Spark期望数据是**逐条产出**, 而不是返回一整个data frame, 所以需要用到 `yield`
 ```python
 def func(df):
     for row in df.itertuples():
@@ -464,6 +467,10 @@ spark-submit \
       --input_yellow=data/pq/yellow/2021/*/ \
       --output=data/report-2021
 ```
+Here are some other parameters:
+- `--executor-memory`: define memory for each executor
+- `--driver-class-path <jar_path>`
+- `--deploy-mode`: client mode for local job, cluster mode for executing jobs in remote cluster
 
 ## Create a Dataproc Cluster
 ### Upload Python Script to GSC Bucket
@@ -480,7 +487,7 @@ gsutil cp 08_local_spark_cluster.py gs://nifty-structure-252803-terra-bucket/cod
 --output=gs://nifty-structure-252803-terra-bucket/report-2021
 ```
 
-### Submit Job in Shell `gcloud`
+### Submit Job in Shell to `gcloud`
 - Add `Dataproc Admin` access to service account
 ```bash
 gcloud dataproc jobs submit pyspark \
@@ -506,7 +513,7 @@ df_result.write.format('bigquery')\
 ```bash
 gsutil cp 09_spark_dataproc_cluster_bigquery.py gs://nifty-structure-252803-terra-bucket/code/09_spark_dataproc_cluster_bigquery.py
 ```
-### Submit Job in `gcloud` 
+### Submit Job in Shell to `gcloud` 
 ```bash
 gcloud dataproc jobs submit pyspark \
     --cluster=de-zoomcamp-cluster \
@@ -524,7 +531,7 @@ List all the file including hidden one
 ```bash
 ls -a
 ```
-List is extended list, listing file's size, access, modified date, etc.
+Return a extended list, listing file's size, access, modified date, etc.
 ```bash
 ls -lh
 ```
@@ -576,5 +583,26 @@ print(squared(5)) #output: 25
   Convert Jupyter Notebook to Python Script
 ```bash
 jupyter nbconvert --to=script <notebook_name>
+```
+`groupByKey` and `reduceByKey`  
+```md
+`groupByKey` 和 `reduceByKey`区别在于, `groupByKey`不会做预聚合, 直接Shuffle将有相同key的(key, value)传递到下一层partition.在下一层里聚合数据. `reduceByKey`会先做预聚合, 将同一层有相同key的value聚合在一起, 再Shuffle到下一层partition, 并在此做最后的聚合.
+`reduceByKey`更适用于处理大数据, 要求的算能低. `groupByKey`会因为传输过多数据, 导致性能低.
+```
+`||` in Shell Command 
+```bash
+# ||代表OR. 
+#如果`command1`失败(返回码非0), 则执行`command2`; 如果`command1`成功(返回码为0), 则执跳过`command2`.
+command1 || command2
+```
+`exit 0` and `exit 1` in Shell Command
+```bash
+exit 0 #任务成功, 返回成功状态码
+exit 1 #任务失败, 返回失败状态码
+```
+`>` and `>>` in Shell Command
+```bash
+> #写入文档, 覆盖已有数据
+>> #写入文档, 添加到已有数据末尾
 ```
 
