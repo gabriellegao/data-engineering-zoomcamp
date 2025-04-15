@@ -45,7 +45,7 @@ echo -e "AIRFLOW_UID=$(id -u)" > .env
 1. 首先在airflow文档下面，创建`Dockerfile`
 1. Repo里有设置好的版本，可以参考
 
-### Docker Compose
+### Docker Compose Revise
 1. 修改docker-compose.yaml中的设置
 1. Repo里有设置好的版本，可以参考
 1. 添加Line 47-49，删除自带的image设置（此段设置已经被添加到Dockerfile中）
@@ -56,6 +56,11 @@ echo -e "AIRFLOW_UID=$(id -u)" > .env
 1. 添加Line66-70, Line 61-62
 1. 更改Line58, change to `false`
 
+### Docker Compose Concepts
+- `x-`开头的字段为`YAML`扩展字段, 不会被解析成services
+- 需要启动的services, 须放在`services:`字段后
+- `&`为锚点, 覆盖的字段从锚点开始, 直到第一个缩进前结束。锚点覆盖的内容可以被后续的services用`<<: *`直接调用.
+- 虽然几个service都调用了锚点下的`image build`, 但是如果Docker发现image已经被构建过, 则不会重复构建, 而是直接拉取此image
 ## Execution
 ### Build Docker Image
 读取`docker-compose.yaml`中指定的`Dockerfile`, 并创建镜像
@@ -133,6 +138,7 @@ environment:
 [Crontab Guru](https://crontab.guru/)
 
 ### Airlfow Xcom
+`Xcom`是一次性读取所有数据, 而不是逐一读取
 ```python
 from airflow.operators.python import PythonOperator
 
@@ -140,7 +146,7 @@ def push_xcom_value(**kwargs):
     kwargs['ti'].xcom_push(key='my_key', value='my_value')
 
 def pull_xcom_value(**kwargs):
-    value = kwargs['ti'].xcom_pull(task_ids='push_task', key='my_key')
+    value = kwargs['ti'].xcom_pull(task_id='push_task', key='my_key')
     print(f"Received XCom Value: {value}")
 
 push_task = PythonOperator(
@@ -157,6 +163,16 @@ pull_task = PythonOperator(
 
 push_task >> pull_task
 ```
+### Airflow Kwargs
+- `kwargs['execution_date']`: DAG 任务的逻辑执行时间
+- `kwargs['ti']`: 任务实例
+  - `ti.xcom_push(key, value)`: 将数据存入 XCom
+  - `ti.xcom_pull(task_ids, key)`: 从 XCom 取出数据
+  - `ti.execution_date`: 任务的逻辑执行时间
+  - `ti.start_date`: 任务实际开始执行的时间
+  - `ti.end_date`: 任务执行完成的时间
+- `kwargs['conf']`: 读取airflow全局配置
+  
 ### Check Airflow Task Status
 ```bash
 docker-compose ps            # 检查所有服务
@@ -164,4 +180,32 @@ docker-compose logs scheduler  # 查看 Scheduler 日志
 airflow dags list            # 列出所有 DAG
 airflow tasks list <dag_id>   # 查看 DAG 里的任务
 airflow tasks test <dag_id> <task_id> <execution_date>  # 运行单个任务
+```
+
+### Airflow Jinja
+Jinjia模版只能在`PythonOperator`和`BashOperator`中使用:
+- `PythonOperator`: 在`templates_dict`中定义, 在`op_kwargs`中调用
+```python
+ingest_task = PythonOperator(
+    task_id="ingest",
+    python_callable=ingest_callable,
+    templates_dict={
+        "table_name": "yellow_taxi_{{ execution_date.strftime('%Y-%m') }}"
+    },
+    provide_context=True,
+    op_kwargs={
+        "table_name": "{{ templates_dict['table_name'] }}"
+    },
+)
+```
+- BashOperator: 在params中定义, 在bash_command中调用
+```python
+curl_task = BashOperator(
+    task_id="curl",
+    bash_command='curl -sSL {{ params.url }} > {{ params.output_file }}',
+    params={
+        "url": URL_TEMPLATE,
+        "output_file": OUTPUT_FILE_TEMPLATE_PARQUET
+    }
+)
 ```

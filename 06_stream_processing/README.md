@@ -238,6 +238,11 @@ consumer = KafkaConsumer()
 consumer.assign([TopicPartition(topic, partition)])
 ```
 
+### Offset Config
+`enable_auto_commit = True` - submit offset automatically  
+
+`enable_auto_commit = False` - manually submit offset by using `comsumer.commit()`
+
 ## Pyspark Streaming Processing
 After installing docker images and starting all services, we can run `producer.py`, `consumer.py` and `streaming.py`.  
 For more information, read [README.md](pyspark/README.md)

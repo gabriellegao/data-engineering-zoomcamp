@@ -17,11 +17,12 @@ class JsonConsumer:
         while True:
             try:
                 # SIGINT can't be handled when polling, limit timeout to 1 second.
-                # Output format: binary -> dict of list(object(list))
+                # Output format: binary -> TopicPartition dictionary
                 message = self.consumer.poll(1.0)
                 if message is None or message == {}:
                     continue
-                # Output format of message_value: list of object
+                # Output format of message_key: key in TopicPartition dictionary
+                # Output format of message_value: Ride object in TopicPartition dictionary
                 for message_key, message_value in message.items():
                     # Output format of msg_val: object
                     for msg_val in message_value:
@@ -36,7 +37,7 @@ if __name__ == '__main__':
     config = {
         'bootstrap_servers': BOOTSTRAP_SERVERS,
         'auto_offset_reset': 'earliest',
-        'enable_auto_commit': True,
+        'enable_auto_commit': True, # True意味着自动提交offset, False的话，需要手动提交并配合commit()使用
         # Convert messages from binary to int
         'key_deserializer': lambda key: int(key.decode('utf-8')),
         #Comvert messages from binary -> json -> dict -> object(list)

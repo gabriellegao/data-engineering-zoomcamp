@@ -105,11 +105,26 @@ python3 consumer.py --topic <topic-name>
 ### Run Streaming Script
 - Consume data from producer
 - Process streaming data using Spark DataFrame
-- Write data to console or another topic of Producer
+- Write data to console or another topic to Producer
 ```bash
 chmod +x spark-submit.sh
 ./spark-submit.sh streaming.py
 ```
+
+### Kafka Streaming Data Schema
+数据格式以table的形式展现
+- key：二进制类型（binary），代表 Kafka 消息的 key。如果消息没有 key，则该字段为 null。
+- value：二进制类型（binary），代表 Kafka 消息的 value。通常是原始的字节数据，你需要转换成字符串或解析成具体格式（比如 JSON）。
+- topic：字符串类型（string），表示消息所在的 Kafka 主题。
+- partition：整数类型（int），表示消息所属的分区编号。
+- offset：长整数类型（long），表示消息在分区内的偏移量。
+- timestamp：时间戳类型（timestamp），记录消息写入 Kafka 的时间。
+- timestampType：整数类型（int），指示 timestamp 的类型（例如，CreateTime 或 LogAppendTime）。
+
+### More in Streaming Script
+- `.option("checkpointLocation", "checkpoint")`: 记录 Streaming 计算的中间状态，以便任务重启时恢复
+
+
 ## Additional Notes
 除了上面提到的, 将ports暴露给主机, 在本地运行`producer.py`和`consumer.py`. 还有以下方法:
 ### Method1: Run `producer.py` and `consumer.py` inside Docker
@@ -185,7 +200,8 @@ services:
     depends_on:
       - broker
       - schema-registry
-    command: ["python3", "producer.py"]  # 启动时运行 producer.py
+    command: 
+      ["python3", "producer.py"]  # 启动时运行 producer.py
 
   consumer:
     build:  # 使用相同镜像
@@ -199,5 +215,6 @@ services:
     depends_on:
       - broker
       - schema-registry
-    command: ["python3", "consumer.py"]  # 启动时运行 consumer.py
+    command: 
+      ["python3", "consumer.py"]  # 启动时运行 consumer.py
 ```

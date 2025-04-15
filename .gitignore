@@ -19,3 +19,5 @@ __pycache__
 week2_workflow_orchestration/airflow/logs/scheduler/latest
 /Users/gabrielle/Desktop/data-engineering-zoomcamp/week2_workflow_orchestration/airflow/logs
 plugins/
+
+practice/

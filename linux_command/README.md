@@ -1,3 +1,4 @@
+## Git Command
 #### Refresh Local Branch from Remote
 ```bash
 git fetch --prune
@@ -28,3 +29,7 @@ git reset --soft HEAD~1
 ```bash
 git rm --cached path/to/large-file
 ```
+
+## Shell Command
+### xargs
+The function of `xargs` is to read an output from the previous command and ingest it as an input for the following execution.

@@ -24,7 +24,7 @@ def parse_ride_from_kafka_message(df, schema):
 
     df = df.selectExpr("CAST(key AS STRING)", "CAST(value AS STRING)")
 
-    # split attributes to nested array in one Column
+    # split nested array in one column to multiple columns
     col = F.split(df['value'], ', ')
 
     # expand col to multiple top-level columns

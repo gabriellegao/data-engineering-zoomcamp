@@ -67,3 +67,16 @@ parse_year_task = PythonOperator(
         provide_context=True
     )
 ```
+### `**kwargs` and `context` in Airflow
+`**kwargs`可接受的参数类型:
+- 动态参数
+- 用户自定义参数
+- Airflow运行时自动提供的参数
+- 参数结构为key-value, 简单的dict结构
+- 不确定参数数量
+`context`可接受的参数类型:
+- 固定参数
+- 用户自定义参数
+- Airflow运行时自动提供的参数
+- 参数结构可以为key-value, 也可以是key-class, key-list, key-json
+- Airflow规定的参数, 比如callback

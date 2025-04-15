@@ -295,6 +295,14 @@ rdd.map(unwrap)\
     .toDF()\
     .show()
 ```
+
+### Summary
+第一步 -> apply `filter()` on each row  
+第二步 -> apply `map()` to establish `key-value` pairs, like `(key, (value1, value2, value3))`  
+第三步 -> apply `reduceByKey()` to perform calculation, like `sum`, `min`, `max`
+第四步 -> (optional)apply `map()` to conduct final calculation, like `average` 
+第五步 -> apply `map` to align each row
+
 ## RDD: MapPartition
 ### Definition of MapPartition
 MapPartition process RDD by partition. Each partition is a iterator
@@ -605,4 +613,14 @@ exit 1 #任务失败, 返回失败状态码
 > #写入文档, 覆盖已有数据
 >> #写入文档, 添加到已有数据末尾
 ```
-
+找寻当前目录及子目录里的CSV文件, 并输出每个文件的行数
+```bash
+find . -type f -name "*.csv" -exec wc -l {} +
+# {} 代指的前面find命令中找到的文件
+# \; 用来终止 -exec命令, \ 特殊符号, 防止shell错误解析
+```
+`-exec` and `|`
+```md
+'-exec' 主要与find命令搭配使用, 对于find命令查找到的文件进行一个外部命令.
+'|' 主要是将前一个命令的输出, 当做输入, 放进下一个命令中.
+```

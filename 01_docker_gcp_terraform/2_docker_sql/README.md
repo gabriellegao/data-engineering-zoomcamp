@@ -11,7 +11,7 @@ Create a new container based on the image
 docker run -it \
   <--entrypoint=> \
   <--name=optional:container_name> \
-  <image_name> <**karg>
+  <image_name> <**kwarg>
 ```
 
 ### Execute Container
