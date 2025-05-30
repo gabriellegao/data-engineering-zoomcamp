@@ -30,6 +30,16 @@ git reset --soft HEAD~1
 git rm --cached path/to/large-file
 ```
 
+### Compare Branch on Local and Remote
+```bash
+git diff --name-only origin/main..HEAD
+```
+
+### Check Branch Connection to Remote
+```bash
+git remote -v
+```
+
 ## Shell Command
 ### xargs
 The function of `xargs` is to read an output from the previous command and ingest it as an input for the following execution.
